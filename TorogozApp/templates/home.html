@@ -1,0 +1,304 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<style>
+    .center-content {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .parqueos-container {
+        text-align: center;
+    }
+</style>
+
+
+<div class="container-fluid px-4">
+    <div class="container-fluid">
+        <div class="row g-0 text-center m-4 pb-4">
+            <div class="center-content text-center mt-5">
+                <div class="parqueos-container col-md-7">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label><h2>Fecha:</h2></label>
+                            
+                            <div id="date" style="font-size: 30px;"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label><h2>Hora:</h2></label>
+                            <div id="clock" style="font-size: 30px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <form method="post" id="myForm" action="{% url 'insertartablagenera' %}">
+            <div class="container mt-5">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-3">
+                        <div>
+                            <label for="fecha">Fecha:</label>
+                            <input type="date" id="start" name="trip-start" value="2024-04-08" min="2018-01-01" max="2050-12-31" />
+                        </div>
+                        <div class="pt-2">
+                            <input type="text" class="form-control" id="nombre1" placeholder="" name="fecha">
+                            <div id="fechaError" class="text-danger"></div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div><label for="tipo">Tipo:</label></div>
+                        <div class="pt-2">
+                            <input type="text" class="form-control" id="tipo" name="tipo">
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div><label for="concepto">Concepto:</label></div>
+                        <div class="pt-2">
+                            <input type="text" class="form-control" id="concepto" name="concepto">
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div><label for="tipoMonto">Selecciona el tipo de monto:</label></div>
+                        <div class="pt-2">
+                            <select class="form-select" id="tipoMonto" name="tipoMonto">
+                                <option value="seleccion">Selecciona un tipo: </option>
+                                <option value="inversion">Inversion</option>
+                                <option value="ingresos a caja">Ingresos a caja</option>
+                                <option value="prestamo">Prestamo</option>
+                                <option value="cobros">Cobros</option>
+                                <option value="creditos">Creditos</option>
+                                <option value="renovaciones">Renovaciones</option>
+                                <option value="salarios">Salarios</option>
+                                <option value="prestamos_trabajadores">Prestamos Trabajadores</option>
+                                <option value="salidas">Salidas</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <input type="hidden" id="fechaActual" name="fechaActual">
+            <input type="hidden" id="horaActual" name="horaActual">
+            <input type="hidden" id="montoHidden" name="montoHidden">
+
+            <div class="text-center mt-5 mb-5">
+                <button class="btn btn-color btn-secondary" style="background-color: #009600; color: #FFFFFF; border: 1px solid #009600;">Enviar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+        <!--<h3 class="pb-2 bg-white mb-4"><CENTER>Salidas Vehiculares</CENTER></h3>-->
+        <div class="container mt-4">
+            <div class="d-flex justify-content-end pb-3">
+                <style>
+
+                    #campo_busqueda {
+                        margin-right: 10px; 
+                    }
+                </style>
+                
+                <div class="text-right d-flex align-items-center">
+                    <!--<input type="text" id="campo_busqueda" placeholder="CONCEPTO:">
+                    <button class="btn btn-primary" id="boton_buscar">Buscar</button>
+                    <button class="btn btn-primary" id="mostrar_todos" style="display: none;">Mostrar Todos</button>-->
+                </div>
+            </div>                
+            <div class="col">
+                <div class="border p-3">                  
+                    <div class="container-fluid">
+                        <div class="row">
+                            <!--<h3 class="pb-2 bg-white mb-4"><CENTER>Salidas Vehiculares</CENTER></h3>-->
+                            <div class="container">
+                                <div class=" d-flex justify-content-end pb-3">
+                                    <style>
+                    
+                                        #campo_busqueda {
+                                            margin-right: 10px; 
+                                        }
+                                    </style>
+                                    
+                                    <div class="text-right d-flex align-items-center">
+                                        <!--<input type="text" id="campo_busqueda" placeholder="CONCEPTO:">
+                                        <button class="btn btn-primary" id="boton_buscar">Buscar</button>
+                                        <button class="btn btn-primary" id="mostrar_todos" style="display: none;">Mostrar Todos</button>-->
+                                    </div>
+                                </div>                
+                                <div class="col pb-5">
+                                    <h2 class="pb-3 fw-bold text-center" >Tabla Balance General</h2>
+                                    <div class="col">
+                                        <div class="border p-3" style="overflow-x: auto;">
+                                            
+                                            <table class="table table-hover table-striped table-bordered" id="example">
+                                               
+                                                <thead style="background-color: #8be4e4; color: #121213;">
+                                                    
+                                                    <th style="width: 200px;">FECHA</th>
+                                                    <th class="text-center">TIPO</th>
+                                                    <th class="text-center">CONCEPTO</th>
+                                                    <th class="text-center">INVERSIÓN</th>
+                                                    <th class="text-center">INGRESOS A CAJA</th>
+                                                    <th class="text-center">PRESTAMO</th>
+                                                    <th class="text-center">COBROS</th>
+                                                    <th class="text-center">CRÉDITOS</th>
+                                                    <th class="text-center">RENOVACIONES</th>
+                                                    <th class="text-center">SALARIOS</th>
+                                                    <th class="text-center">PRESTAMOS TRABAJADORES</th>
+                                                    <th class="text-center">SALIDAS</th>
+                                                    <th class="text-center">TOTAL</th>
+                                                    <!--<th colspan="2" class="text-center">OPCIONES</th>-->
+                                                </thead>
+                                                <tbody>
+                                                    {% for item in registros %}
+                                                    <tr>
+                                                        
+                                                        <td class="text-center" style="font-size: 18px; width: 200px;" >{{ item.fecha|default_if_none:'-' }}</td>
+                                                        <td class="text-center" style="font-size: 20px;">{{ item.tipo|default_if_none:'-' }}</td>
+                                                        <td class="text-center" style="font-size: 20px;">{{ item.concepto|default_if_none:'-' }}</td>
+                                                        <td class="text-center" style="font-size: 20px;">{{ item.inversion|default_if_none:'-' }}</td>
+                                                        <td class="text-center" style="font-size: 20px;">{{ item.ingresos_a_caja|default_if_none:'-' }}</td>
+                                                        <td class="text-center" style="font-size: 20px;">{{ item.prestamo|default_if_none:'-' }}</td>
+                                                        <td class="text-center" style="font-size: 20px;">{{ item.cobros|default_if_none:'-' }}</td>
+                                                        <td class="text-center" style="font-size: 20px;">{{ item.creditos|default_if_none:'-' }}</td>
+                                                        <td class="text-center" style="font-size: 20px;">{{ item.renovaciones|default_if_none:'-' }}</td>
+                                                        <td class="text-center" style="font-size: 20px;">{{ item.salarios|default_if_none:'-' }}</td>
+                                                        <td class="text-center" style="font-size: 20px;">{{ item.prestamos_trabajadores|default_if_none:'-' }}</td>
+                                                        <td class="text-center" style="font-size: 20px;">{{ item.salidas|default_if_none:'-' }}</td>
+                                                        <td class="text-center" style="font-size: 20px;">${{ item.total|default_if_none:'-' }}</td>
+                                                        <!--<td style="font-size: 20px;" class="text-center"><a href="actualizarregistros/{{c.idregistrovehiculos}}" class="btn btn-primary btn-lg">Salida</a></td>
+                                                        <td style="font-size: 20px;" class="text-center"><a href="eliminarregistros/{{c.idregistrovehiculos}}" class="btn btn-danger btn-lg">Eliminar</a></td>-->
+                                                        
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                       
+                                        </div>
+                                    </div> 
+                                </div>
+                            <!--Hasta aqui cierra el div-->
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+        <!--<h3 class="pb-2 bg-white mb-4"><CENTER>Salidas Vehiculares</CENTER></h3>-->
+        <div class="container">
+            <div class="d-flex justify-content-end pb-3">
+                <style>
+
+                    #campo_busqueda {
+                        margin-right: 10px; 
+                    }
+                </style>
+                
+                <div class="text-right d-flex align-items-center">
+                    <!--<input type="text" id="campo_busqueda" placeholder="CARNET/DUI:">
+                    <button class="btn btn-primary" id="boton_buscar">Buscar</button>
+                    <button class="btn btn-primary" id="mostrar_todos" style="display: none;">Mostrar Todos</button>-->
+                </div>
+            </div>   
+            <div>
+                <h2 class="text-center fw-bold p-3 pb-2">Tabla Créditos & Renovaciones</h2>
+            </div>             
+            <div class="row">
+                <div class="col pt-3">
+                    <div class="border p-3">
+                        <table class="table table-hover table-striped table-bordered" id="tabla_creditos_renovaciones">
+                            <thead style="background-color: #FFE68D; color: #121213;">
+                                <th class="text-center">CONCEPTO</th>
+                                <th class="text-center">FECHA</th>
+                                <th class="text-center">TIPO</th>
+                                <th class="text-center">CANTIDAD</th>
+                            </thead>
+                            <tbody>
+                                {% for item in registros2 %}
+                                <tr>
+                                    <td class="text-center" style="font-size: 20px;">{{ item.concepto|default_if_none:'-' }}</td>
+                                    <td class="text-center" style="font-size: 18px;">{{ item.fecha|default_if_none:'-' }}</td>
+                                    <td class="text-center" style="font-size: 18px;">{{ item.tipo|default_if_none:'-' }}</td>
+                                    <td class="text-center" style="font-size: 20px;">{{ item.cantidad|default_if_none:'-' }}</td>       
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            
+                <div class="col pt-3">
+                    <div class="border p-3">
+                        <table class="table table-hover table-striped table-bordered" id="tabla_renovaciones">
+                            <thead style="background-color: #FFE68D; color: #121213;">
+                                <tr>
+                                    <th class="text-center">CRÉDITOS 20 DIAS</th>
+                                    <th class="text-center">CRÉDITOS 30 DIAS</th>
+                                    <th class="text-center">CRÉDITOS 60 DIAS</th>
+                                    <th class="text-center">RENOVACIONES 20 DIAS</th>
+                                    <th class="text-center">RENOVACIONES 30 DIAS</th>
+                                    <th class="text-center">RENOVACIONES 60 DIAS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                               
+                                <tr>
+                                    <td class="text-center">{{ registros3.creditos_20_dias }}</td>
+                                    <td class="text-center">{{ registros3.creditos_30_dias }}</td>
+                                    <td class="text-center">{{ registros3.creditos_60_dias }}</td>
+                                    <td class="text-center">{{ registros3.renovacion_20_dias }}</td>
+                                    <td class="text-center">{{ registros3.renovacion_30_dias }}</td>
+                                    <td class="text-center">{{ registros3.renovacion_60_dias }}</td>
+                                    
+                                </tr>
+                                <tr>
+                                    <td class="text-center" colspan="3">Creditos: {{ registros3.total_creditos }}</td>
+                                    <td class="text-center" colspan="3">Renovaciones: {{ registros3.total_renovacion }}</td>
+                                </tr>
+                                
+                            </tbody>
+                        </table>
+                        
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+
+
+
+    </div>
+    <!-- /#page-content-wrapper -->
+    </div>
+    <script>
+        document.getElementById("myForm").addEventListener("submit", function(event) {
+            var matricula = document.getElementById("nombre1").value;
+            var matriculaError = document.getElementById("matriculaError");
+
+            if (matricula.trim() === "") {
+                matriculaError.textContent = "Por favor, ingrese carnet o dui.";
+                event.preventDefault(); // Evitar que el formulario se envíe si hay errores
+            } else {
+                matriculaError.textContent = ""; // Limpiar el mensaje de error si la matrícula es válida
+            }
+        });
+    </script>
+
+    
+   
+{% endblock %}
+    
